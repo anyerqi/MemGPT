@@ -34,9 +34,12 @@ services:
       - MEMGPT_PG_HOST=pgvector_db
       - MEMGPT_PG_PORT=5432
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SEARCH_ENGINE_ENDPOINT=${SEARCH_ENGINE_ENDPOINT}
+      - SEARCH_ENGINE_AUTH_KEY=${SEARCH_ENGINE_AUTH_KEY}
     volumes:
       - ./configs/server_config.yaml:/root/.memgpt/config # config file
       - ~/.memgpt/credentials:/root/.memgpt/credentials # credentials file
+      - ./logs:/root/.memgpt/logs # logs dir
   memgpt_nginx:
     hostname: memgpt-nginx
     image: nginx:stable-alpine3.17-slim
