@@ -122,7 +122,7 @@ def setup_agents_message_router(server: SyncServer, interface: QueuingInterface,
             create_preset_from_file(preset_file, DEFAULT_PRESET_NAME, user_id, server.ms)
         
         agents_result = server.list_agents(user_id)
-        print(f"first load agents: {agents_result}")
+        #print(f"first load agents: {agents_result}")
         if "agents" not in agents_result is None or len(agents_result["agents"]) == 0:
             server.create_agent(
                 user_id=user_id,
@@ -175,6 +175,48 @@ def setup_agents_message_router(server: SyncServer, interface: QueuingInterface,
         # print(f"ISO format string: {msg['created_at']}")
         # print(msg)
         return GetAgentMessagesResponse(messages=messages)
+
+    def reset_agent(user_id: uuid.UUID, agent_id: uuid.UUID, stream: bool):
+        try:
+            server.delete_agent(user_id, agent_id)
+            agent_id = get_default_agent_id(user_id)
+        except Exception as e:
+            print(f"[message] reset error:{e}")
+        if stream:
+            chat_message = ChatCompletionResponse(
+                id = str(uuid.uuid4()),
+                created =int(datetime.now().timestamp()),
+                model = "gpt-3.5-turbo",
+                choices= [{
+                    "index":0,
+                    "delta":{
+                        "role":"assistant",
+                        "content": "success"
+                },
+                "finish_reason":"stop"
+            }]
+            )
+            formatted_message = f"data: {chat_message.model_dump_json()}\n\n"
+            async def formatted_message_generator():
+                yield formatted_message
+                await asyncio.sleep(1) 
+                yield "data: [DONE]\n\n"
+            return StreamingResponse(formatted_message_generator(), media_type="text/event-stream")
+        else:
+            return ChatCompletionResponse(
+                id = str(uuid.uuid4()),
+                created =int(datetime.now().timestamp()),
+                model = "gpt-3.5-turbo",
+                choices= [{
+                    "index":0,
+                    "message":{
+                        "role":"assistant",
+                        "content": "success"
+                    },
+                    "finish_reason":"stop"
+                }],
+                object="chat.completion"
+            )
 
     @router.post("/agents/{agent_id}/messages", tags=["agents"], response_model=UserMessageResponse)
     async def send_message(
@@ -268,9 +310,12 @@ def setup_agents_message_router(server: SyncServer, interface: QueuingInterface,
             message_func = server.system_message
         else:
             raise HTTPException(status_code=400, detail=f"Bad role {message.role}")
+        
         user_id = convert_uuid(request.user)
         agent_id = get_default_agent_id(user_id)
         print(f"[chat.completion] user_id:{user_id}, agent_id:{agent_id}")
+        if message.role == "user" and message.content.startswith("#reset"):
+            return reset_agent(user_id, agent_id, request.stream)
         if request.stream:
             # For streaming response
             try:
