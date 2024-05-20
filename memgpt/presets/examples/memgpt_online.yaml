@@ -9,3 +9,7 @@ functions:
   - "archival_memory_insert"
   - "archival_memory_search"
   - "online_search"
+  - "get_url_content"
+  - "search_stock_symbol"
+  - "stock_kline"
+  - "stock_quotec"

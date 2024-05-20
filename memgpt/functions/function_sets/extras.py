@@ -2,7 +2,6 @@ import json
 import os
 import uuid
 from typing import Optional
-
 import requests
 
 from memgpt.constants import (
@@ -13,9 +12,6 @@ from memgpt.constants import (
 )
 from memgpt.data_types import Message
 from memgpt.llm_api.llm_api_tools import create
-
-SEARCH_ENGINE_ENDPOINT = os.getenv("SEARCH_ENGINE_ENDPOINT")
-SEARCH_ENGINE_AUTH_KEY = os.getenv("SEARCH_ENGINE_AUTH_KEY")
 
 
 def message_chatgpt(self, message: str):
@@ -137,32 +133,3 @@ def http_request(self, method: str, url: str, payload_json: Optional[str] = None
         return {"error": str(e)}
     
 
-def online_search(self, query: str) -> str:
-    """
-    Retrieve relevant contents online
-  
-    This function generates a list of items, which relevated to keyword user inputs.
-    Args:
-        query (str): String to search for.
-    Returns:
-        str: Query result string
-    """
-    
-    url = f"{SEARCH_ENGINE_ENDPOINT}?q={query}&format=json"
-
-    payload = {}
-    headers = {
-        'Authorization': f'Bearer {SEARCH_ENGINE_AUTH_KEY}'
-    }
-    response = requests.request("GET", url, headers=headers, data=payload)
-    if response.status_code != 200:
-        return "something error"
-    else:
-        data = response.json()
-        if "results" not in data or len(data["results"]) == 0:
-            return f"No results found."
-        results = data["results"]
-        results_pref = f"Showing {len(results)} results:"
-        results_formatted = [f"title: {d['title']}, content: {d['content']}, url: {d['url']}" for d in results]
-        results_str = f"{results_pref} {json.dumps(results_formatted, ensure_ascii=False)}"
-        return results_str
