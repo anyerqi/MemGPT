@@ -13,3 +13,4 @@ functions:
   - "search_stock_symbol"
   - "stock_kline"
   - "stock_quotec"
+  - "get_current_time_info"
