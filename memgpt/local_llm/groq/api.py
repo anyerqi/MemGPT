@@ -54,7 +54,7 @@ def get_groq_completion(endpoint: str, auth_type: str, auth_key: str, model: str
     # Settings for the generation, includes the prompt + stop tokens, max length, etc
     request = settings
     request["model"] = model
-    request["max_tokens"] = context_window
+    request["max_tokens"] = 8192 if context_window > 8192 else context_window
     # NOTE: Hack for chat/completion-only endpoints: put the entire completion string inside the first message
     message_structure = [{"role": "user", "content": prompt}]
     request["messages"] = message_structure
