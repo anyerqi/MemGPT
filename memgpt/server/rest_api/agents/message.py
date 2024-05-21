@@ -12,7 +12,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 
-from memgpt.constants import JSON_ENSURE_ASCII
+from memgpt.constants import JSON_ENSURE_ASCII, DEFAULT_PRESET_NAME
 from memgpt.server.rest_api.auth_token import get_current_user
 from memgpt.server.rest_api.interface import QueuingInterface
 from memgpt.server.server import SyncServer
@@ -113,13 +113,16 @@ def setup_agents_message_router(server: SyncServer, interface: QueuingInterface,
 
     def get_default_agent_id(user_id: uuid.UUID):
         # create user if not existed
-        DEFAULT_PRESET_NAME = "memgpt_search"
+        
         if server.get_user(user_id) is None:
             print(f"[chat.completion]create user:{user_id}")
             user = server.create_user({"id": user_id})
             print(f"[chat.completion] new user created:{user.id}")
             preset_file = os.path.join(memgpt.__path__[0], "presets", "examples", "memgpt_online.yaml")
             create_preset_from_file(preset_file, DEFAULT_PRESET_NAME, user_id, server.ms)
+        elif server.get_preset(preset_name=DEFAULT_PRESET_NAME, user_id=user_id) is None:
+            preset_file = os.path.join(memgpt.__path__[0], "presets", "examples", "memgpt_online.yaml")
+            create_preset_from_file(preset_file, DEFAULT_PRESET_NAME, user_id, server.ms) 
         
         agents_result = server.list_agents(user_id)
         #print(f"first load agents: {agents_result}")
@@ -178,7 +181,11 @@ def setup_agents_message_router(server: SyncServer, interface: QueuingInterface,
 
     def reset_agent(user_id: uuid.UUID, agent_id: uuid.UUID, stream: bool):
         try:
+            
             server.delete_agent(user_id, agent_id)
+            preset = server.get_preset(preset_name=DEFAULT_PRESET_NAME, user_id=user_id)
+            if preset is not None:
+                server.delete_preset(user_id, preset.id)
             agent_id = get_default_agent_id(user_id)
         except Exception as e:
             print(f"[message] reset error:{e}")
