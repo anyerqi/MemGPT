@@ -32,7 +32,7 @@ def search_stock_symbol(self, keyword: str):
     url = suggest_stock_url + keyword
     response = utls.fetch(url, host)
     if "data" in response:
-        return [{"code": item["code"], "query": item["query"]} for item in response['Data']]
+        return [{"code": item["code"], "query": item["query"]} for item in response['data']]
     return []
 
 # SYMBOL_KEYS = ["symbol", "symbols"]

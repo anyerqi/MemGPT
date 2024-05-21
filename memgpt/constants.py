@@ -123,3 +123,5 @@ JSON_ENSURE_ASCII = False
 
 # GLOBAL SETTINGS FOR `json.loads()`
 JSON_LOADS_STRICT = False
+
+DEFAULT_PRESET_NAME = "memgpt_online"

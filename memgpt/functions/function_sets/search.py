@@ -9,7 +9,7 @@ SEARCH_ENGINE_AUTH_KEY = os.getenv("SEARCH_ENGINE_AUTH_KEY")
 
 def online_search(self, query: str) -> list[str]:
     """
-    Retrieve relevant contents online
+    Retrieve URLs of relevant contents online
   
     This function generates a list of URLs, which relevated to keyword user inputs, then use 'get_url_content' to get the content of the url.
     Args:
