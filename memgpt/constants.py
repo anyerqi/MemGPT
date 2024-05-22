@@ -70,6 +70,7 @@ LLM_MAX_TOKENS = {
     "gpt-3.5-turbo-0613": 4096,  # legacy
     "gpt-3.5-turbo-16k-0613": 16385,  # legacy
     "gpt-3.5-turbo-0301": 4096,  # legacy
+    "Baichuan2-Turbo-192k": 192000
 }
 # The amount of tokens before a sytem warning about upcoming truncation is sent to MemGPT
 MESSAGE_SUMMARY_WARNING_FRAC = 0.75
@@ -98,7 +99,7 @@ CORE_MEMORY_PERSONA_CHAR_LIMIT = 2000
 CORE_MEMORY_HUMAN_CHAR_LIMIT = 2000
 
 # Function return limits
-FUNCTION_RETURN_CHAR_LIMIT = 3000  # ~300 words
+FUNCTION_RETURN_CHAR_LIMIT = 10000  # ~300 words
 
 MAX_PAUSE_HEARTBEATS = 360  # in min
 
