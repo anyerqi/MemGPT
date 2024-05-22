@@ -7,15 +7,15 @@ import os
 SEARCH_ENGINE_ENDPOINT = os.getenv("SEARCH_ENGINE_ENDPOINT")
 SEARCH_ENGINE_AUTH_KEY = os.getenv("SEARCH_ENGINE_AUTH_KEY")
 
-def online_search(self, query: str) -> list[str]:
+def online_search(self, query: str) -> list[dict]:
     """
-    Retrieve URLs of relevant contents online
+    Retrieve relevant contents online
   
-    This function generates a list of URLs, which relevated to keyword user inputs, then use 'get_url_content' to get the content of the url.
+    This function generates a list of dict, each one contains url, content.
     Args:
         query (str): String to search for.
     Returns:
-        str: a list of URLs
+        list([dict]): a list of result
     """
     
     url = f"{SEARCH_ENGINE_ENDPOINT}?q={query}&format=json"
@@ -36,7 +36,7 @@ def online_search(self, query: str) -> list[str]:
         #results_formatted = [f"title: {d['title']}, content: {d['content']}, url: {d['url']}" for d in results]
         #results_str = f"{results_pref} {json.dumps(results_formatted, ensure_ascii=False)}"
         #return results_str
-        return [d["url"] for d in results[:5]]
+        return [{"url": d["url"], "content": d["content"]} for d in results[:5]]
 
 # def get_url_content(self, url: str) -> str:
 #     """
