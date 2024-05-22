@@ -38,36 +38,74 @@ def online_search(self, query: str) -> list[str]:
         #return results_str
         return [d["url"] for d in results[:5]]
 
-def get_url_content(self, url: str) -> str:
+# def get_url_content(self, url: str) -> str:
+#     """
+#     Fetches HTML data from the given URL, parses it using BeautifulSoup, and extracts text content.
+
+#     Args:
+#         url (str): The URL to fetch data from.
+
+#     Returns:
+#         str: A JSON string containing either the extracted text or an error message.
+
+#     Example:
+#         url = "https://example.com"
+#         result = get_url_content(url)
+#         print(result)
+#     """
+#     try:
+#         response = requests.get(url)
+#         response.raise_for_status()  # Raise an exception for HTTP errors
+
+#         # Parse the HTML content using BeautifulSoup
+#         soup = BeautifulSoup(response.content, "html.parser")
+
+#         # Extract text from the parsed HTML
+#         text_content = soup.get_text(separator="\n", strip=True)
+
+#         # Return the extracted text content in a dictionary
+#         return json.dumps({"content": text_content})
+#     except requests.exceptions.RequestException as e:
+#         # Handle any request-related errors
+#         return json.dumps({"error": f"Request error: {str(e)}"})
+#     except Exception as e:
+#         # Handle any other parsing-related errors
+#         return json.dumps({"error": f"Parsing error: {str(e)}"})
+
+
+def get_url_content(self, urls: list[str]) -> str:
     """
-    Fetches HTML data from the given URL, parses it using BeautifulSoup, and extracts text content.
+    Attempts to fetch HTML data from a list of URLs, parses it using BeautifulSoup, and extracts text content.
+    Moves to the next URL in the list if the current one fails.
 
     Args:
-        url (str): The URL to fetch data from.
+        urls (list): The list of URLs to fetch data from.
 
     Returns:
         str: A JSON string containing either the extracted text or an error message.
 
     Example:
-        url = "https://example.com"
-        result = get_url_content(url)
+        urls = ["https://example.com", "https://example2.com"]
+        result = get_url_content(urls)
         print(result)
     """
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an exception for HTTP errors
+    for url in urls:
+        try:
+            print(f"get_url_content: {url}")
+            response = requests.get(url, timeout=100)  # Adding a timeout for the request
+            response.raise_for_status()  # Raise an exception for HTTP errors
 
-        # Parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(response.content, "html.parser")
+            # Parse the HTML content using BeautifulSoup
+            soup = BeautifulSoup(response.content, "html.parser")
 
-        # Extract text from the parsed HTML
-        text_content = soup.get_text(separator="\n", strip=True)
+            # Extract text from the parsed HTML
+            text_content = soup.get_text(separator="\n", strip=True)
 
-        # Return the extracted text content in a dictionary
-        return json.dumps({"content": text_content})
-    except requests.exceptions.RequestException as e:
-        # Handle any request-related errors
-        return json.dumps({"error": f"Request error: {str(e)}"})
-    except Exception as e:
-        # Handle any other parsing-related errors
-        return json.dumps({"error": f"Parsing error: {str(e)}"})
+            # Return the first successful text content extraction
+            return json.dumps({"content": text_content, "url": url})
+        except requests.exceptions.RequestException as e:
+            # Log the error and continue with the next URL
+            continue  # Log the specific error and URL if necessary
+
+    # Return error if all URLs fail
+    return json.dumps({"error": "All URLs failed to provide valid content."})
